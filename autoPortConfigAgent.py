@@ -55,9 +55,13 @@ class InterfaceMonitor(eossdk.AgentHandler, eossdk.IntfHandler, eossdk.MacTableH
     def on_agent_option(self, optionName, value):
         # if we have a new batch of interfaces to watch, let's figure them out
         if optionName == "enableLLDP":
-            if value and value.lower() == "true":
+            # if no value present, default to "true"
+            value = value or "true" 
+            if value.lower() == "true":
+                self.tracer.trace5("take action on LLDP PDUs: enabled")
                 self.enableLLDP = True
             else:
+                self.tracer.trace5("take action on LLDP PDUs: disabled")
                 self.enableLLDP = False
 
         elif optionName == "interfaces":
