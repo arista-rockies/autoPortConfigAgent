@@ -165,23 +165,26 @@ class InterfaceMonitor(eossdk.AgentHandler, eossdk.IntfHandler, eossdk.MacTableH
 
     def parseConfig(self, fileHandle):
         result = {"configs":[]}
+        success = False
 
         try:
             result = yaml.safe_load(fileHandle)
+            success = True
         except:
             # we failed loading yaml.  let's try json
             try:
                 fileHandle.seek(0)
                 result = json.load(fileHandle)
+                success = True
             except:
                 pass
 
-        if not isinstance(result, dict) or len(result['configs']) == 0:
+        if not isinstance(result, dict) or not success:
             self.tracer.trace0("Error loading the configuration")
             raise Exception("Error loading the configuration")
 
         # now we need to reformat all the macs, ouis, and lldpcaps to something consistent and usable
-        for config in result['configs']:
+        for config in result.get('configs', []):
             for ar in ['macs', 'ouis']:
                 config['config'][ar] = list(map(formatMac, config['config'].get(ar, [])))
 
